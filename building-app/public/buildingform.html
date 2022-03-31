@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building Accessibility</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+<body>
+
+    <form action="/create" method="post">
+        <h3>Add a new building</h3>
+
+        Building Name: <input name="name">
+        <p>
+            <input type="checkbox" id="accessible_entrance" name="accessible_entrance" value="yes">
+            <label for="accessible_entrance"> Accessible Entrance</label><br>
+        
+            <input type="checkbox" id="accessible_restroom" name="accessible_restroom" value="yes">
+            <label for="accessible_restroom"> Accessible Restroom</label><br>
+        
+            <input type="checkbox" id="handicap_parking" name="handicap_parking" value="yes">
+            <label for="handicap_parking"> Handicap Parking</label><br>
+        <p>
+        
+            <input type="submit" value="Submit">
+        
+        </form>
+</body>
+
+</html>
+
+
+
+
