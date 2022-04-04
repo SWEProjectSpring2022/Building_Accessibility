@@ -47,6 +47,49 @@ app.use('/create', bodyParser.json(), (req, res) => {
     }
     );
 
+app.use('/create', bodyParser.json(), (req, res) => {
+
+	// construct the Building from the form data which is in the request body
+	var newBuilding = new Building ({
+		name: req.body.name,
+		accessible_entrance: req.body.accessible_entrance == "yes" ? true : false,
+		accessible_restroom: req.body.accessible_restroom == "yes" ? true : false,
+		handicap_parking: req.body.handicap_parking == "yes" ? true : false
+	    });
+
+	// save the person to the database
+	newBuilding.save( (err) => { 
+		if (err) {
+		    res.type('html').status(200);
+		    res.write('uh oh: ' + err);
+		    console.log(err);
+		    res.end();
+		}
+		else {
+		    // display the "successfull created" message
+		    res.send('successfully added ' + newBuilding.name + ' to the database');
+		}
+	    } ); 
+    }
+    );
+
+app.use('/delete', bodyParser.json(), (req, res) => {
+	
+	// construct the Building from the form data which is in the request body
+	var filter = {'name' : req.body.name};
+	Building.findOneAndDelete( filter, (err,building) => {
+		if(err){
+			console.log('uh oh' + err);
+		} else if(!building){
+			console.log("No building found");
+		} else{
+			console.log("Building found");
+		}
+	});
+    res.send('successfully deleted ' + req.body.name + ' from the database');
+    }
+    );
+
 // endpoint for showing all the buildings
 app.use('/all', (req, res) => {
     
@@ -85,25 +128,7 @@ app.use('/all', (req, res) => {
 });
 
 
-// IMPLEMENT THIS ENDPOINT!
-app.use('/delete', (req, res) => {
-	var queryObject = {};
-	if (req.query.name) {
-	    queryObject = { "name" : req.query.name };
-	}
 
-	var filter = {'name' : req.query.name};
-	Building.findOneAndDelete( filter, (err,building) => {
-		if(err){
-			console.log('uh oh' + err);
-		} else if(!building){
-			console.log("No building found");
-		} else{
-			console.log("Building found");
-		}
-	});
-    res.redirect('/all');
-});
 
 // endpoint for accessing data via the web api
 // to use this, make a request for /api to get an array of all Person objects
