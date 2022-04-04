@@ -10,16 +10,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // import the Building class from Building.js
 var Building = require('./Building.js');
 
-/***************************************/
 
-// endpoint for creating a new building
-// this is the action of the "create new building" form
-
-// app.use('/new_building', (req,res) => {
-
-
-
-// });
 
 var buildingToBeEdited = "";
 
@@ -46,6 +37,23 @@ app.use('/create', bodyParser.json(), (req, res) => {
 		    res.send('successfully added ' + newBuilding.name + ' to the database');
 		}
 	    } ); 
+    }
+    );
+
+app.use('/delete', bodyParser.json(), (req, res) => {
+	
+	// construct the Building from the form data which is in the request body
+	var filter = {'name' : req.body.name};
+	Building.findOneAndDelete( filter, (err,building) => {
+		if(err){
+			console.log('uh oh' + err);
+		} else if(!building){
+			console.log("No building found");
+		} else{
+			console.log("Building found");
+		}
+	});
+    res.send('successfully deleted ' + req.body.name + ' from the database');
     }
     );
 
@@ -90,26 +98,6 @@ app.use('/all', (req, res) => {
 	    });
 });
 
-
-app.use('/delete', (req, res) => {
-	var queryObject = {};
-	if (req.query.name) {
-	    queryObject = { "name" : req.query.name };
-	}
-
-	var filter = {'name' : req.query.name};
-	Building.findOneAndDelete( filter, (err,building) => {
-		if(err){
-			console.log('uh oh' + err);
-		} else if(!building){
-			console.log("No building found");
-		} else{
-			console.log("Building found");
-		}
-	});
-    res.redirect('/all');
-});
-
 // endpoint for showing all the buildings
 app.use('/allForEditing', (req, res) => {
     
@@ -147,7 +135,6 @@ app.use('/allForEditing', (req, res) => {
 });
 
 app.use('/edit', bodyParser.json(), (req, res) => {
-
 	var queryObject = {};
 	if (req.query.name) {
 	    queryObject = { "name" : req.query.name };
@@ -235,10 +222,6 @@ app.use('/api', (req, res) => {
 	    });
     });
 
-
-
-
-/*************************************************/
 
 // app.use('/new', (req, res) => {
 // 	var newPerson = new Person({name: req.query.name,
