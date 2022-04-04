@@ -87,7 +87,7 @@ app.use('/all', (req, res) => {
 					res.write('<li>');
 					res.write('Name: ' + building.name + '; accessible entrance: ' + building.accessible_entrance + '; accessible restroom: ' + building.accessible_restroom + '; handicap parking: ' + building.handicap_parking);
 					// this creates a link to the /delete endpoint
-					res.write(" <a href=\"/delete?name=" + building.name + "\">[Delete]</a>");
+					// res.write(" <a href=\"/delete?name=" + building.name + "\">[Delete]</a>");
 					res.write('</li>');
 					 
 			});
