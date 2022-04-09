@@ -9,17 +9,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // import the Building class from Building.js
 var Building = require('./Building.js');
+app.set('view engine', 'ejs');
 
 /***************************************/
-
-// endpoint for creating a new building
-// this is the action of the "create new building" form
-
-// app.use('/new_building', (req,res) => {
-
-
-
-// });
 
 var buildingToBeEdited = "";
 
@@ -28,9 +20,11 @@ app.use('/create', bodyParser.json(), (req, res) => {
 	// construct the Building from the form data which is in the request body
 	var newBuilding = new Building ({
 		name: req.body.name,
-		accessible_entrance: req.body.accessible_entrance == "yes" ? true : false,
-		accessible_restroom: req.body.accessible_restroom == "yes" ? true : false,
-		handicap_parking: req.body.handicap_parking == "yes" ? true : false
+		address: req.body.address,
+		accessible_entrance: req.body.accessible_entrance,
+		//accessible_restroom: req.body.accessible_restroom == "yes" ? true : false,
+		accessible_restroom: req.body.accessible_restroom,
+		handicap_parking: req.body.handicap_parking
 	    });
 
 	// save the person to the database
@@ -77,7 +71,7 @@ app.use('/all', (req, res) => {
 				// show all the buildings
 				buildings.forEach( (building) => {
 					res.write('<li>');
-					res.write('Name: ' + building.name + '; accessible entrance: ' + building.accessible_entrance + '; accessible restroom: ' + building.accessible_restroom + '; handicap parking: ' + building.handicap_parking);
+					res.write('Name: ' + building.name + '; address: ' + building.address + '; accessible entrance: ' + building.accessible_entrance + '; accessible restroom: ' + building.accessible_restroom + '; handicap parking: ' + building.handicap_parking);
 					// this creates a link to the /delete endpoint
 					res.write(" <a href=\"/delete?name=" + building.name + "\">[Delete]</a>");
 					res.write('</li>');
@@ -110,7 +104,18 @@ app.use('/delete', (req, res) => {
     res.redirect('/all');
 });
 
-// endpoint for showing all the buildings
+app.use('/showEditForm', (req,res) => {
+	var query = {"name" : req.query.name };
+	Building.findOne(query, (err, result) => {
+		if (err) {
+			res.render("error", {'error' : err});
+		}
+		else {
+			res.render("editForm", {"building" : result});
+		}
+	})
+});
+
 app.use('/allForEditing', (req, res) => {
     
 	// find all the Building objects in the database
@@ -121,22 +126,27 @@ app.use('/allForEditing', (req, res) => {
 		    res.write(err);
 		}
 		else {
-		    if (buildings.length == 0) {
-			res.type('html').status(200);
-			res.write('There are no buildings');
-			res.end();
-			return;
+			if (buildings.length == 0) {
+				res.type('html').status(200);
+				res.write('There are no buildings');
+				res.end();
+				return;
 		    }
 		    else {
-			res.type('html').status(200);
-			res.write('Here are the buildings in the database:');
-			res.write('<ul>');
-			// show all the buildings
-			buildings.forEach( (building) => {
-			    res.write('<li>');
-			    res.write('Name: ' + building.name + '; accessible entrance: ' + building.accessible_entrance + '; accessible restroom: ' + building.accessible_restroom + '; handicap parking: ' + building.handicap_parking);
-				//res.write(" <a href=\"public/editform.html?name=" + building.name + "\">[Edit]</a>");
-			    res.write('</li>');
+
+				// Below single line accessed from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare
+				buildings.sort((a, b) => a.name.localeCompare(b.name))
+
+				res.type('html').status(200);
+				res.write('Here are the buildings in the database:');
+				res.write('<ul>');
+				// show all the buildings
+				buildings.forEach( (building) => {
+					res.write('<li>');
+					res.write('Name: ' + building.name + '; address: ' + building.address + '; accessible entrance: ' + building.accessible_entrance + '; accessible restroom: ' + building.accessible_restroom + '; handicap parking: ' + building.handicap_parking);
+					
+					res.write(" <a href=\"/showEditForm?name=" + building.name + "\">[Edit]</a>");
+					res.write('</li>');
 					 
 			});
 			res.write('</ul>');
@@ -162,17 +172,23 @@ app.use('/edit', bodyParser.json(), (req, res) => {
 	if (req.body.newname == null || !req.body.newname) {
 		req.body.newname = req.body.name;
 	}
+
+	if (req.body.newaddress == null || !req.body.newaddress) {
+		req.body.newaddress = req.body.address;
+	}
 	
 	var newBuilding = new Building ({
 		name: req.body.newname,
-		accessible_entrance: req.body.accessible_entrance == "yes" ? true : false,
-		accessible_restroom: req.body.accessible_restroom == "yes" ? true : false,
-		handicap_parking: req.body.handicap_parking == "yes" ? true : false
+		address: req.body.newaddress,
+		accessible_entrance: req.body.accessible_entrance,
+		accessible_restroom: req.body.accessible_restroom,
+		handicap_parking: req.body.handicap_parking
 	    });
 
 	Building.findOneAndUpdate( filter, 
 		{$set: {
 			name: newBuilding.name,
+			address: newBuilding.address,
 			accessible_entrance: newBuilding.accessible_entrance,
 			accessible_restroom: newBuilding.accessible_restroom,
 			handicap_parking: newBuilding.handicap_parking
@@ -187,7 +203,7 @@ app.use('/edit', bodyParser.json(), (req, res) => {
 		} 
 	});
 	console.log("Entry updated successfully");
-	res.redirect('/all');
+	res.redirect('/allForEditing');
 });
 
 // endpoint for accessing data via the web api
@@ -214,7 +230,8 @@ app.use('/api', (req, res) => {
 		else if (buildings.length == 1 ) {
 		    var building = buildings[0];
 		    // send back a single JSON object
-		    res.json( { "name" : building.name , 
+		    res.json( { "name" : building.name ,
+			"address" : building.address, 
 				"accessible entrance" : building.accessible_entrance, 
 					"accessible restroom" : building.accessible_restroom , 
 						"handicap parking" : building.handicap_parking} );
@@ -223,7 +240,8 @@ app.use('/api', (req, res) => {
 		    // construct an array out of the result
 		    var returnArray = [];
 		    buildings.forEach( (building) => {
-			    returnArray.push( { "name" : building.name, 
+			    returnArray.push( { "name" : building.name,
+				"address" : building.address,
 					"accessible entrance" : building.accessible_entrance, 
 						"accessible restroom" : building.accessible_restroom, 
 							"handicap parking" : building.handicap_parking } );
@@ -234,26 +252,6 @@ app.use('/api', (req, res) => {
 		
 	    });
     });
-
-
-
-
-/*************************************************/
-
-// app.use('/new', (req, res) => {
-// 	var newPerson = new Person({name: req.query.name,
-// 								age: req.query.age,
-// 								accessible_entrance = req.query.accessible_entrance});
-
-// 	newPerson.save((err) => {
-// 		if(err){
-// 			res.json({'status' : 'error'});
-// 			console.log(err);
-// 		} else{
-// 			res.json({'status' : 'success'});
-// 		}
-// 	});
-// });
 
 app.use('/public', express.static('public'));
 

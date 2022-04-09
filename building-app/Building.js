@@ -8,9 +8,10 @@ var Schema = mongoose.Schema;
 
 var buildingSchema = new Schema({
 	name: {type: String, required: true, unique: true},
-    accessible_entrance: {type: Boolean,required: true, unique: false},
-    accessible_restroom: {type: Boolean, required: true,unique:false},
-    handicap_parking : {type: Boolean, required: true, unique: false}
+    address: {type: String, required: true, unique: true},
+    accessible_entrance: {type: String,required: true, unique: false},
+    accessible_restroom: {type: String, required: true,unique:false},
+    handicap_parking : {type: String, required: true, unique: false}
     });
 
 // export personSchema as a class called Person
