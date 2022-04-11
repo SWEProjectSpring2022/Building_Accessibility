@@ -108,6 +108,79 @@ app.use('/all', (req, res) => {
 	    });
 });
 
+app.use('/showInformation', (req,res) => {
+	var query = {"name" : req.query.name };
+	Building.findOne(query, (err, result) => {
+		if (err) {
+			res.render("error", {'error' : err});
+		}
+		else {
+			res.render("viewForm", {"building" : result});
+		}
+	})
+});
+
+app.use('/allForView', (req, res) => {
+    
+	// find all the Building objects in the database
+	Building.find( {}, (err, buildings) => {
+		if (err) {
+		    res.type('html').status(200);
+		    console.log('uh oh' + err);
+		    res.write(err);
+		}
+		else {
+			if (buildings.length == 0) {
+				res.type('html').status(200);
+				res.write('There are no buildings');
+				res.end();
+				return;
+		    }
+		    else {
+
+				// Below single line accessed from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare
+				buildings.sort((a, b) => a.name.localeCompare(b.name))
+
+				res.type('html').status(200);
+				res.write('Here are the buildings in the database:');
+				res.write('<ul>');
+				// show all the buildings
+				buildings.forEach( (building) => {
+					res.write('<li>');
+					res.write('Name: ' + building.name);
+					
+					res.write(" <a href=\"/showInformation?name=" + building.name + "\">[ViewInfo]</a>");
+					res.write('</li>');
+					 
+			});
+			res.write('</ul>');
+			res.end();
+		    }
+		}
+	    });
+});
+
+app.use('/view', (req, res) => {
+	var queryObject = {};
+	if (req.query.name) {
+	    queryObject = { "name" : req.query.name };
+	}
+
+	var filter = {'name' : req.query.name};
+	Building.findOne( filter, (err,building) => {
+		if(err){
+			console.log('uh oh' + err);
+		} else if(!building){
+			console.log("No building found");
+		} else{
+			res.write('<li>');
+			res.write('Name: ' + building.name + '; address: ' + building.address + '; accessible entrance: ' + building.accessible_entrance + '; accessible restroom: ' + building.accessible_restroom + '; handicap parking: ' + building.handicap_parking);
+			res.write('</li>');
+			console.log("Building found");
+		}
+	});
+    res.redirect('/all');
+});
 
 app.use('/delete', (req, res) => {
 	var queryObject = {};
