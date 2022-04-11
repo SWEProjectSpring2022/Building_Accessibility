@@ -44,6 +44,7 @@ app.use('/delete', bodyParser.json(), (req, res) => {
 	
 	// construct the Building from the form data which is in the request body
 	var filter = {'name' : req.body.name};
+	var passed = 0;
 	Building.findOneAndDelete( filter, (err,building) => {
 		if(err){
 			console.log('uh oh' + err);
@@ -51,11 +52,18 @@ app.use('/delete', bodyParser.json(), (req, res) => {
 			console.log("No building found");
 		} else{
 			console.log("Building found");
+			var passed = 1;
 		}
 	});
-    res.send('successfully deleted ' + req.body.name + ' from the database');
-    }
-    );
+	if (passed == 1){
+    	res.send('successfully deleted ' + req.body.name + ' from the database');
+	}
+	else{
+		res.send(req.body.name + ' does not exist');
+
+	}
+}
+);
 
 // endpoint for showing all the buildings
 app.use('/all', (req, res) => {
@@ -87,7 +95,7 @@ app.use('/all', (req, res) => {
 					res.write('<li>');
 					res.write('Name: ' + building.name + '; accessible entrance: ' + building.accessible_entrance + '; accessible restroom: ' + building.accessible_restroom + '; handicap parking: ' + building.handicap_parking);
 					// this creates a link to the /delete endpoint
-					// res.write(" <a href=\"/delete?name=" + building.name + "\">[Delete]</a>");
+					//res.write(" <a href=\"/delete?name=" + building.name + "\">[Delete]</a>");
 					res.write('</li>');
 					 
 			});
