@@ -9,6 +9,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // import the Building class from Building.js
 var Building = require('./Building.js');
+var Form = require('./Form.js');
 app.set('view engine', 'ejs');
 
 
@@ -41,6 +42,30 @@ app.use('/create', bodyParser.json(), (req, res) => {
 	    } ); 
     }
     );
+	app.use('/addForms', bodyParser.json(), (req, res) => {
+
+		// construct the Building from the form data which is in the request body
+		var newForm = new Form ({
+			name: req.body.name,
+			building_name : req.body.building_name,
+			description : req.body.description
+			});
+	
+		// save the form to the database
+		newForm.save( (err) => { 
+			if (err) {
+				res.type('html').status(200);
+				res.write('uh oh: ' + err);
+				console.log(err);
+				res.end();
+			}
+			else {
+				// display the "successfull created" message
+				res.send('successfully added ' + newForm.name + " buidlding: " + newForm.building_name + ' to the database');
+			}
+			} ); 
+		}
+		);
 
 app.use('/delete', bodyParser.json(), (req, res) => {
 	
@@ -159,6 +184,49 @@ app.use('/allForView', (req, res) => {
 		}
 	    });
 });
+
+app.use('/viewForms', (req, res) => {
+    
+	// find all the Building objects in the database
+	Form.find( {}, (err, forms) => {
+		if (err) {
+		    res.type('html').status(200);
+		    console.log('uh oh' + err);
+		    res.write(err);
+		}
+		else {
+			if (forms.length == 0) {
+				res.type('html').status(200);
+				res.write('There are no forms submitted to the admin');
+				res.end();
+				return;
+		    }
+		    else {
+
+				// Below single line accessed from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare
+				forms.sort((a, b) => a.name.localeCompare(b.name))
+
+				res.type('html').status(200);
+				res.write('Here are the forms in the database:');
+				res.write('<ul>');
+				// show all the buildings
+				forms.forEach( (form) => {
+					res.write('<li>');
+					res.write('User Name: ' + form.name);
+					res.write('<br>');
+					res.write('Building Name: ' + form.building_name);
+					res.write('<br>');
+					res.write('Description:' + form.description);
+					res.write('</li>');
+					 
+			});
+			res.write('</ul>');
+			res.end();
+		    }
+		}
+	    });
+});
+
 
 app.use('/view', (req, res) => {
 	var queryObject = {};
