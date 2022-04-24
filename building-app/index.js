@@ -27,7 +27,7 @@ app.use('/create', bodyParser.json(), (req, res) => {
 	    });
 
 	// save the person to the database
-	newBuilding.save( (err) => { 
+	newBuilding.save( (err) => {
 		if (err) {
 		    res.type('html').status(200);
 		    res.write('uh oh: ' + err);
@@ -38,38 +38,33 @@ app.use('/create', bodyParser.json(), (req, res) => {
 		    // display the "successfull created" message
 		    res.send('successfully added ' + newBuilding.name + ' to the database');
 		}
-	    } ); 
+	    } );
     }
     );
 
 app.use('/delete', bodyParser.json(), (req, res) => {
-	
+
 	// construct the Building from the form data which is in the request body
 	var filter = {'name' : req.body.name};
-	var passed = 0;
+
 	Building.findOneAndDelete( filter, (err,building) => {
 		if(err){
+			res.send(req.body.name + ' does not exist');
 			console.log('uh oh' + err);
 		} else if(!building){
+			res.send(req.body.name + ' does not exist');
 			console.log("No building found");
 		} else{
+			res.send('successfully deleted ' + req.body.name + ' from the database');
 			console.log("Building found");
-			var passed = 1;
 		}
 	});
-	if (passed == 1){
-    	res.send('successfully deleted ' + req.body.name + ' from the database');
-	}
-	else{
-		res.send(req.body.name + ' does not exist');
-
-	}
 }
 );
 
 // endpoint for showing all the buildings
 app.use('/all', (req, res) => {
-    
+
 	// find all the Building objects in the database
 	Building.find( {}, (err, buildings) => {
 		if (err) {
@@ -99,7 +94,7 @@ app.use('/all', (req, res) => {
 					// this creates a link to the /delete endpoint
 					//res.write(" <a href=\"/delete?name=" + building.name + "\">[Delete]</a>");
 					res.write('</li>');
-					 
+
 			});
 			res.write('</ul>');
 			res.end();
@@ -120,8 +115,179 @@ app.use('/showInformation', (req,res) => {
 	})
 });
 
+app.use('/findOneJSON', (req, res) => {
+	var data = [];
+	var queryObject = {};
+	if (req.query.name) {
+			queryObject = { "name" : req.query.name };
+	}
+
+	var filter = {'name' : req.query.name};
+	Building.findOne( filter, (err,building) => {
+		if(err){
+			res.type('html').status(200);
+			console.log('uh oh' + err);
+			res.write(err);
+		} else if(!building){
+			res.type('html').status(200);
+			res.write("No building found");
+			console.log("No building found");
+			res.end();
+
+		} else{
+			res.type('html').status(200);
+			data.push({'name' : building.name, 'address' : building.address, 'handicap_parking' : building.handicap_parking,
+				'access_ent' : building.accessible_entrance, 'access_rest' : building.accessible_restroom });
+				res.json(data);
+		}
+	});
+});
+
+app.use('/handicapJSON', (req, res) => {
+    var data = [];
+		var filter = {'handicap_parking' : "Yes"};
+		Building.find( filter, (err,buildings) => {
+		if (err) {
+		    res.type('html').status(200);
+		    console.log('uh oh' + err);
+		    res.write(err);
+		}
+		else {
+			if (buildings.length == 0) {
+				res.type('html').status(200);
+				res.write('There are no buildings');
+				res.end();
+				return;
+		    }
+		    else {
+
+				// Below single line accessed from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare
+				buildings.sort((a, b) => a.name.localeCompare(b.name))
+
+				res.type('html').status(200);
+
+				// show all the buildings
+				buildings.forEach( (building) => {
+
+					data.push({'name' : building.name, 'address' : building.address, 'handicap_parking' : building.handicap_parking,
+						'access_ent' : building.accessible_entrance, 'access_rest' : building.accessible_restroom });
+
+				});
+				res.json(data);
+		    }
+		}
+	    });
+});
+
+app.use('/restroomJSON', (req, res) => {
+    var data = [];
+		var filter = {'accessible_restroom' : "Yes"};
+		Building.find( filter, (err,buildings) => {
+		if (err) {
+		    res.type('html').status(200);
+		    console.log('uh oh' + err);
+		    res.write(err);
+		}
+		else {
+			if (buildings.length == 0) {
+				res.type('html').status(200);
+				res.write('There are no buildings');
+				res.end();
+				return;
+		    }
+		    else {
+
+				// Below single line accessed from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare
+				buildings.sort((a, b) => a.name.localeCompare(b.name))
+
+				res.type('html').status(200);
+
+				// show all the buildings
+				buildings.forEach( (building) => {
+
+					data.push({'name' : building.name, 'address' : building.address, 'handicap_parking' : building.handicap_parking,
+						'access_ent' : building.accessible_entrance, 'access_rest' : building.accessible_restroom });
+
+				});
+				res.json(data);
+		    }
+		}
+	    });
+});
+
+app.use('/entranceJSON', (req, res) => {
+    var data = [];
+		var filter = {'accessible_entrance' : "Yes"};
+		Building.find( filter, (err,buildings) => {
+		if (err) {
+		    res.type('html').status(200);
+		    console.log('uh oh' + err);
+		    res.write(err);
+		}
+		else {
+			if (buildings.length == 0) {
+				res.type('html').status(200);
+				res.write('There are no buildings');
+				res.end();
+				return;
+		    }
+		    else {
+
+				// Below single line accessed from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare
+				buildings.sort((a, b) => a.name.localeCompare(b.name))
+
+				res.type('html').status(200);
+
+				// show all the buildings
+				buildings.forEach( (building) => {
+
+					data.push({'name' : building.name, 'address' : building.address, 'handicap_parking' : building.handicap_parking,
+						'access_ent' : building.accessible_entrance, 'access_rest' : building.accessible_restroom });
+
+				});
+				res.json(data);
+		    }
+		}
+	    });
+});
+
+app.use('/allForViewJSON', (req, res) => {
+    var data = [];
+	// find all the Building objects in the database
+	Building.find( {}, (err, buildings) => {
+		if (err) {
+		    res.type('html').status(200);
+		    console.log('uh oh' + err);
+		    res.write(err);
+		}
+		else {
+			if (buildings.length == 0) {
+				res.type('html').status(200);
+				res.write('There are no buildings');
+				res.end();
+				return;
+		    }
+		    else {
+
+				// Below single line accessed from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare
+				buildings.sort((a, b) => a.name.localeCompare(b.name))
+
+				res.type('html').status(200);
+
+				// show all the buildings
+				buildings.forEach( (building) => {
+
+					data.push({'name' : building.name, 'address' : building.address, 'handicap_parking' : building.handicap_parking,
+						'access_ent' : building.accessible_entrance, 'access_rest' : building.accessible_restroom });
+
+				});
+				res.json(data);
+		    }
+		}
+	    });
+});
 app.use('/allForView', (req, res) => {
-    
+
 	// find all the Building objects in the database
 	Building.find( {}, (err, buildings) => {
 		if (err) {
@@ -148,10 +314,10 @@ app.use('/allForView', (req, res) => {
 				buildings.forEach( (building) => {
 					res.write('<li>');
 					res.write('Name: ' + building.name);
-					
+
 					res.write(" <a href=\"/showInformation?name=" + building.name + "\">[ViewInfo]</a>");
 					res.write('</li>');
-					 
+
 			});
 			res.write('</ul>');
 			res.end();
@@ -182,12 +348,11 @@ app.use('/view', (req, res) => {
     res.redirect('/all');
 });
 
-app.use('/delete', (req, res) => {
+/**app.use('/delete', (req, res) => {
 	var queryObject = {};
 	if (req.query.name) {
 	    queryObject = { "name" : req.query.name };
 	}
-
 	var filter = {'name' : req.query.name};
 	Building.findOneAndDelete( filter, (err,building) => {
 		if(err){
@@ -199,7 +364,7 @@ app.use('/delete', (req, res) => {
 		}
 	});
     res.redirect('/all');
-});
+});*/
 
 app.use('/showEditForm', (req,res) => {
 	var query = {"name" : req.query.name };
@@ -214,7 +379,7 @@ app.use('/showEditForm', (req,res) => {
 });
 
 app.use('/allForEditing', (req, res) => {
-    
+
 	// find all the Building objects in the database
 	Building.find( {}, (err, buildings) => {
 		if (err) {
@@ -241,10 +406,10 @@ app.use('/allForEditing', (req, res) => {
 				buildings.forEach( (building) => {
 					res.write('<li>');
 					res.write('Name: ' + building.name + '; address: ' + building.address + '; accessible entrance: ' + building.accessible_entrance + '; accessible restroom: ' + building.accessible_restroom + '; handicap parking: ' + building.handicap_parking);
-					
+
 					res.write(" <a href=\"/showEditForm?name=" + building.name + "\">[Edit]</a>");
 					res.write('</li>');
-					 
+
 			});
 			res.write('</ul>');
 			res.end();
@@ -272,7 +437,7 @@ app.use('/edit', bodyParser.json(), (req, res) => {
 	if (req.body.newaddress == null || !req.body.newaddress) {
 		req.body.newaddress = req.body.address;
 	}
-	
+
 	var newBuilding = new Building ({
 		name: req.body.newname,
 		address: req.body.newaddress,
@@ -281,22 +446,22 @@ app.use('/edit', bodyParser.json(), (req, res) => {
 		handicap_parking: req.body.handicap_parking
 	    });
 
-	Building.findOneAndUpdate( filter, 
+	Building.findOneAndUpdate( filter,
 		{$set: {
 			name: newBuilding.name,
 			address: newBuilding.address,
 			accessible_entrance: newBuilding.accessible_entrance,
 			accessible_restroom: newBuilding.accessible_restroom,
 			handicap_parking: newBuilding.handicap_parking
-		}}, 
+		}},
 		(err, building) => {
 		if(err){
 			console.log('uh oh' + err);
 		} else if(!building){
 			console.log("No building found");
 		} else {
-			console.log("Building found");	
-		} 
+			console.log("Building found");
+		}
 	});
 	console.log("Entry updated successfully");
 	res.redirect('/allForEditing');
@@ -312,7 +477,7 @@ app.use('/api', (req, res) => {
 	    // if there's a name in the query parameter, use it here
 	    queryObject = { "name" : req.query.name };
 	}
-    
+
 	Building.find( queryObject, (err, buildings) => {
 		console.log(buildings);
 		if (err) {
@@ -327,9 +492,9 @@ app.use('/api', (req, res) => {
 		    var building = buildings[0];
 		    // send back a single JSON object
 		    res.json( { "name" : building.name ,
-			"address" : building.address, 
-				"accessible entrance" : building.accessible_entrance, 
-					"accessible restroom" : building.accessible_restroom , 
+			"address" : building.address,
+				"accessible entrance" : building.accessible_entrance,
+					"accessible restroom" : building.accessible_restroom ,
 						"handicap parking" : building.handicap_parking} );
 		}
 		else {
@@ -338,14 +503,14 @@ app.use('/api', (req, res) => {
 		    buildings.forEach( (building) => {
 			    returnArray.push( { "name" : building.name,
 				"address" : building.address,
-					"accessible entrance" : building.accessible_entrance, 
-						"accessible restroom" : building.accessible_restroom, 
+					"accessible entrance" : building.accessible_entrance,
+						"accessible restroom" : building.accessible_restroom,
 							"handicap parking" : building.handicap_parking } );
 			});
 		    // send it back as JSON Array
-		    res.json(returnArray); 
+		    res.json(returnArray);
 		}
-		
+
 	    });
     });
 
