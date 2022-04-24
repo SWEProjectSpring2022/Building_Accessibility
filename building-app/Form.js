@@ -14,7 +14,6 @@ var formSchema = new Schema({
 
 // export formSchema as a class called Form
 module.exports = mongoose.model('Form', formSchema);
-db.collection.dropIndexes();
 
 formSchema.methods.standardizeName = function() {
     this.name = this.name.toLowerCase();

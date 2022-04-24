@@ -13,9 +13,17 @@ var Form = require('./Form.js');
 app.set('view engine', 'ejs');
 
 
-var buildingToBeEdited = "";
+	var buildingToBeEdited = "";
 
-app.use('/create', bodyParser.json(), (req, res) => {
+	app.use('/test', (req, res) => {
+	// create a JSON object
+	var data = { 'message' : 'It works!' };
+      	// send it back
+	res.json(data);
+    });
+
+
+	app.use('/create', bodyParser.json(), (req, res) => {
 
 	// construct the Building from the form data which is in the request body
 	var newBuilding = new Building ({
@@ -28,20 +36,20 @@ app.use('/create', bodyParser.json(), (req, res) => {
 	    });
 
 	// save the person to the database
-	newBuilding.save( (err) => { 
-		if (err) {
-		    res.type('html').status(200);
-		    res.write('uh oh: ' + err);
-		    console.log(err);
-		    res.end();
-		}
-		else {
-		    // display the "successfull created" message
-		    res.send('successfully added ' + newBuilding.name + ' to the database');
-		}
-	    } ); 
-    }
-    );
+		newBuilding.save( (err) => { 
+			if (err) {
+		    	res.type('html').status(200);
+		    	res.write('uh oh: ' + err);
+		    	console.log(err);
+		    	res.end();
+			}
+			else {
+		    	// display the "successfull created" message
+		    	res.send('successfully added ' + newBuilding.name + ' to the database');
+			}
+		}); 
+	});
+
 	app.use('/addForms', bodyParser.json(), (req, res) => {
 
 		// construct the Building from the form data which is in the request body
@@ -64,8 +72,52 @@ app.use('/create', bodyParser.json(), (req, res) => {
 				res.send('successfully added ' + newForm.name + " buidlding: " + newForm.building_name + ' to the database');
 			}
 			} ); 
-		}
-		);
+	});
+
+	app.use('/androidGetForms', (req,res)=>{
+		Form.find((err, allForms) => {
+			if(err){
+				res.json({'status': 'Error'});
+			} else if(allForms.length == 0){
+				res.json({'status' : 'None'});
+			} else{
+				res.json({'status' : 'Success',
+						'forms' : allForms} );
+			}
+		});
+
+	});
+
+
+		app.use('/androidAddForms', bodyParser.json(), (req, res) => {
+
+			// construct the Building from the form data which is in the request body
+			var newForm = new Form ({
+				name: req.query.name,
+				building_name : req.query.building_name,
+				description : req.query.description
+				});
+		
+			// save the form to the database
+			newForm.save( (err) => { 
+				if (err) {
+					// res.type('html').status(200);
+					// res.write('uh oh: ' + err);
+					// console.log(err);
+					// res.end();
+					var data1 = { 'message' : 'Error' };
+					res.json(data1);
+				}
+				else {
+					// display the "successfull created" message
+					var data = { 'message' : 'Submitted' };
+      				// send it back
+					res.json(data);
+					//res.send('successfully added ' + newForm.name + " buidlding: " + newForm.building_name + ' to the database');
+				}
+				} ); 
+			}
+			);
 
 app.use('/delete', bodyParser.json(), (req, res) => {
 	
