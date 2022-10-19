@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building Accessibility</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+<body>
+
+    <form action="/viewForms" method="post">
+        <h3>All Forms in Database</h3>
+        <input type="submit" value="View All">
+    </form>
+
+    <form action="/addForms" method="post">
+        <h3>Add form</h3>
+        User Name: <input type="text" name="name">
+        Building Name: <input type="text" id = "building_name" name="building_name">
+        Description: <input type="text" id = "description" name="description">
+    <input type="submit" value="Add Form">
+    </form>   
+</body>
+
+</html>
+
+
+
+
